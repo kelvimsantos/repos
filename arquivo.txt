@@ -1,0 +1,284 @@
+controller
+
+   [HttpPost]
+        [Route("DadosFormalizacao")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ResponseWrapper<InserirConsultaAssincronaResponse>))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ResponseOnModelException))]
+        [ProducesResponseType(StatusCodes.Status412PreconditionFailed, Type = typeof(ResponseOnException))]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity, Type = typeof(ResponseOnException))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError, Type = typeof(ResponseOnException))]
+        public async Task<CustomApiResponse> DadosFormalizacao(IncluirDadosFormalizacaoRequest incluirDadosFormalizacaoRequest)
+        {
+            if (!ModelState.IsValid)
+                throw new ApiException(ModelState.AllErrors());
+            else
+                try
+                {
+                    InserirConsultaAssincronaResponse inserirConsultaAssincronaResponse = await _dataprevManager.IncluirDadosFormalizacao(incluirDadosFormalizacaoRequest);
+                    return new CustomApiResponse(inserirConsultaAssincronaResponse, _dataprevManager.ObterLog());
+                }
+                catch (ApiException ex)
+                {
+                    _logger.LogError(ex, ex.Message);
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, ex.Message);
+                    throw new ApiException(ex.Message, StatusCodes.Status500InternalServerError);
+                }
+        }
+------------------------------------------------------------------------------------
+manager
+
+ public async Task<InserirConsultaAssincronaResponse> IncluirDadosFormalizacao(IncluirDadosFormalizacaoRequest incluirDadosFormalizacaoRequest)
+        {
+
+            //Endereco newEndereco= new Endereco()
+            //{
+            //    bairro = incluirDadosFormalizacaoRequest.endereco.Bairro,
+            //    Cep = incluirDadosFormalizacaoRequest.endereco.Cep,
+            //    Cidade = incluirDadosFormalizacaoRequest.endereco?.Cidade,
+            //    Complemento = incluirDadosFormalizacaoRequest.endereco?.Complemento,
+            //    Estado = incluirDadosFormalizacaoRequest.endereco?.Estado,
+            //    Logradouro = incluirDadosFormalizacaoRequest.endereco?.Logradouro,
+            //    Numero = incluirDadosFormalizacaoRequest.endereco?.Numero
+
+            //};
+            incluirDadosFormalizacaoRequest.informacoesPessoais = new IncluirDadosFormalizacaoRequest.InformacoesPessoais();
+
+            string dataInicio = _timeZoneTime.DateLog();
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            _logConsulta.RotaConsulta = "IncluirDadosFormalizacao";
+            try
+            {
+                ParametrosConfigurationRequest parametrosConfiguration = await _parametrosManager.ObterParametros();
+                ProcessamentoDadosFormalizacao processamentoDadosFormalizacao = new ProcessamentoDadosFormalizacao
+                {
+              
+
+                CodigoAdesao = incluirDadosFormalizacaoRequest.CodigoAdesao,
+                    Bairro = newEndereco.bairro,
+                    Cep = newEndereco.Cep,
+                    Cidade = newEndereco.Cidade,
+                    Complemento = newEndereco.Complemento,
+                    Estado = newEndereco.Estado,
+                    Logradouro = newEndereco.Logradouro,
+                    Numero = newEndereco.Numero,
+                    DataEmissao = incluirDadosFormalizacaoRequest.informacoesPessoais?.DataEmissao,
+                    DataNascimento = incluirDadosFormalizacaoRequest.informacoesPessoais?.DataNascimento,
+                    DocumentoIdentificacao = incluirDadosFormalizacaoRequest.informacoesPessoais?.DocumentoIdentificacao,
+                    EnderecoEletronico = incluirDadosFormalizacaoRequest.informacoesPessoais?.EnderecoEletronico,
+                    EstadoCivil = incluirDadosFormalizacaoRequest.informacoesPessoais.EstadoCivil,
+                    GrauInstrucao = incluirDadosFormalizacaoRequest.informacoesPessoais.GrauInstrucao,
+                    Nacionalidade = incluirDadosFormalizacaoRequest.informacoesPessoais?.Nacionalidade,
+                    Naturalidade = incluirDadosFormalizacaoRequest.informacoesPessoais?.Naturalidade,
+                    Nome = incluirDadosFormalizacaoRequest.informacoesPessoais?.Nome,
+                    NomeConjuge = incluirDadosFormalizacaoRequest.informacoesPessoais?.NomeConjuge,
+                    NomeMae = incluirDadosFormalizacaoRequest.informacoesPessoais?.NomeMae,
+                    NomePai = incluirDadosFormalizacaoRequest.informacoesPessoais?.NomePai,
+                    NumeroDocumento = incluirDadosFormalizacaoRequest.informacoesPessoais?.NumeroDocumento,
+                    OrgaoEmissor = incluirDadosFormalizacaoRequest.informacoesPessoais?.OrgaoEmissor,
+                    Sexo = incluirDadosFormalizacaoRequest.informacoesPessoais?.Sexo,
+                    Uf = incluirDadosFormalizacaoRequest.informacoesPessoais?.Uf,
+
+                    UfEmissor = incluirDadosFormalizacaoRequest.informacoesPessoais?.UfEmissor,
+                    SituacaoFuncional = incluirDadosFormalizacaoRequest.SituacaoFuncional,
+
+                    //    Ddd = incluirDadosFormalizacaoRequest.Ddd,
+                    //  Telefone = incluirDadosFormalizacaoRequest.Telefone,
+                    // Tipo = incluirDadosFormalizacaoRequest.Tipo,
+
+                    ConsultaSerpro = incluirDadosFormalizacaoRequest.retornoAnaliseDocumental.ConsultaSerpro,
+                    DevolucaoSerproPercentual = incluirDadosFormalizacaoRequest.retornoAnaliseDocumental.DevolucaoSerproPercentual,
+                    ResultadoFaceMatchPercentual = incluirDadosFormalizacaoRequest.retornoAnaliseDocumental.ResultadoFaceMatchPercentual,
+                    RetornoAnaliseDataTrust = incluirDadosFormalizacaoRequest.retornoAnaliseDocumental.RetornoAnaliseDataTrust,
+
+                    DocumentosPendenciados = incluirDadosFormalizacaoRequest.retornoAnaliseDocumental.DocumentosPendenciados,
+                    IdentificadorExterno = incluirDadosFormalizacaoRequest.retornoAnaliseDocumental.IdentificadorExterno,
+                    MotivosCancelamento = incluirDadosFormalizacaoRequest.retornoAnaliseDocumental.MotivosCancelamento,
+                    ObservacaoAnalista = incluirDadosFormalizacaoRequest.retornoAnaliseDocumental.ObservacaoAnalista,
+                    TipoRetorno = incluirDadosFormalizacaoRequest.retornoAnaliseDocumental.TipoRetorno,
+                    RetornoCidadeOfensora = incluirDadosFormalizacaoRequest.RetornoCidadeOfensora,
+                    RetornoClienteVulneravel = incluirDadosFormalizacaoRequest.RetornoClienteVulneravel,
+                    NumeroProposta = incluirDadosFormalizacaoRequest.NumeroProposta
+
+
+                };
+
+                InserirConsultaAssincronaResponse inserirConsultaAssincronaResponse = await _mongoRepository.InserirProcessamentoDadosFormalizacao(processamentoDadosFormalizacao);
+
+                await ChamadaSnsProcessamento(new ProcessarConsultaRequest { Id = inserirConsultaAssincronaResponse.Identificador }, parametrosConfiguration.AwsSnsContratoArquivosArn, parametrosConfiguration);
+                return inserirConsultaAssincronaResponse;
+            }
+            catch (ApiException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new ApiException($"IncluirDadosFormalizacao Message: {ex.Message}", StatusCodes.Status500InternalServerError);
+            }
+            finally
+            {
+                stopwatch.Stop();
+                _logConsulta.TempoProcessamento = stopwatch.ElapsedMilliseconds;
+                _logConsulta.DataConsulta = dataInicio;
+                _mongoRepository.InserirLogConsulta(_logConsulta).SafeFireAndForget(onException: (exception) =>
+                {
+                    _logger.LogError(exception, $"Falha ao inserir no mongo o log da consulta");
+                });
+            }
+//----------------------------------------------------
+
+classe de entrada base
+using System;
+using System.Collections.Generic;
+
+namespace BMG.Metabusca.Dataprev.AWS.DTO.Request
+{
+    public class IncluirDadosFormalizacaoRequest
+    {
+     
+        public string CodigoAdesao { get; set; }
+    //    public Endereco endereco { get; set; }
+       
+        public InformacoesPessoais informacoesPessoais { get; set; }
+        public RetornoAnaliseDocumental retornoAnaliseDocumental { get; set; }
+
+        public int SituacaoFuncional { get; set; }
+        public List<Telefone> Telefones { get; set; }
+
+        public string RetornoCidadeOfensora { get; set; }
+        public string RetornoClienteVulneravel { get; set; }
+        public string NumeroProposta { get; set; }
+
+        public class RetornoAnaliseDocumental
+        {
+            public string ConsultaSerpro { get; set; }
+            public int DevolucaoSerproPercentual { get; set; }
+            public int ResultadoFaceMatchPercentual { get; set; }
+            public string RetornoAnaliseDataTrust { get; set; }
+            public string DocumentosPendenciados { get; set; }
+            public string IdentificadorExterno { get; set; }
+            public string MotivosCancelamento { get; set; }
+            public string ObservacaoAnalista { get; set; }
+            public string TipoRetorno { get; set; }
+        }
+        public class Endereco
+        {
+            public string Bairro { get; set; }
+            public int Cep { get; set; }
+            public string Cidade { get; set; }
+            public string Complemento { get; set; }
+            public string Estado { get; set; }
+            public string Logradouro { get; set; }
+            public string Numero { get; set; }
+            public Endereco endereco { get ; set; }
+
+           
+        }
+
+        public class InformacoesPessoais
+        {
+            public string DataEmissao { get; set; }
+            public string DataNascimento { get; set; }
+            public string DocumentoIdentificacao { get; set; }
+            public string EnderecoEletronico { get; set; }
+            public int EstadoCivil { get; set; }
+            public int GrauInstrucao { get; set; }
+            public string Nacionalidade { get; set; }
+            public string Naturalidade { get; set; }
+            public string Nome { get; set; }
+            public string NomeConjuge { get; set; }
+            public string NomeMae { get; set; }
+            public string NomePai { get; set; }
+            public string NumeroDocumento { get; set; }
+            public string OrgaoEmissor { get; set; }
+            public string Sexo { get; set; }
+            public string Uf { get; set; }
+            public string UfEmissor { get; set; }
+        }
+
+        public class Telefone
+        {
+            public int Ddd { get; set; }
+            public int Numero { get; set; }
+            public int Tipo { get; set; }
+        }
+
+    }
+        
+    }
+
+//-------------------------------------------------------------------------
+using BMG.Metabusca.Dataprev.AWS.DTO.Request;
+using MongoDB.Bson.Serialization.Attributes;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace BMG.Metabusca.Dataprev.AWS.Data.Models
+{
+    [BsonCollection("fila_dados_formalizacao")]
+    [BsonIgnoreExtraElements]
+    public class ProcessamentoDadosFormalizacao : Document
+    {
+        public bool Processado { get; set; }
+        public string DataInclusao { get; set; }
+        public string Ip { get; set; }
+
+
+        public string CodigoAdesao { get; set; }
+        public string Bairro { get; set; }
+        public int Cep { get; set; }
+        public string Cidade { get; set; }
+        public string Complemento { get; set; }
+        public string Estado { get; set; }
+        public string Logradouro { get; set; }
+        public string Numero { get; set; }
+        public string DataEmissao { get; set; }
+        public string DataNascimento { get; set; }
+        public string DocumentoIdentificacao { get; set; }
+        public string EnderecoEletronico { get; set; }
+        public int EstadoCivil { get; set; }
+        public int GrauInstrucao { get; set; }
+        public string Nacionalidade { get; set; }
+        public string Naturalidade { get; set; }
+        public string Nome { get; set; }
+        public string NomeConjuge { get; set; }
+        public string NomeMae { get; set; }
+        public string NomePai { get; set; }
+        public string NumeroDocumento { get; set; }
+        public string OrgaoEmissor { get; set; }
+        public string Sexo { get; set; }
+        public string Uf { get; set; }
+
+        public string UfEmissor { get; set; }
+        public int SituacaoFuncional { get; set; }
+        //----------------
+        public InfoTelefones[] telefone { get; set; }
+
+      //  public int Ddd { get; set; }
+     //   public int Telefone { get; set; }
+      //  public int Tipo { get; set; }
+        //----------------------------------
+        public string ConsultaSerpro { get; set; }
+        public int DevolucaoSerproPercentual { get; set; }
+        public int ResultadoFaceMatchPercentual { get; set; }
+        public string RetornoAnaliseDataTrust { get; set; }
+
+        public string DocumentosPendenciados { get; set; }
+        public string IdentificadorExterno { get; set; }
+        public string MotivosCancelamento { get; set; }
+        public string ObservacaoAnalista { get; set; }
+        public string TipoRetorno { get; set; }
+        public string RetornoCidadeOfensora { get; set; }
+        public string RetornoClienteVulneravel { get; set; }
+        public string NumeroProposta { get; set; }
+    }
+}
+
